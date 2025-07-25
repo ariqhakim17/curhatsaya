@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chat App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Test Chat Application</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="testServer()">Test Server Connection</button>
+    <button onclick="testChatAPI()">Test Chat API</button>
+    <button onclick="testGeminiDirect()">Test Gemini Direct</button>
+    
+    <script>
+        function addResult(message, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+        
+        async function testServer() {
+            try {
+                const response = await fetch('http://localhost:3001/');
+                if (response.ok) {
+                    addResult('✅ Server is running and accessible');
+                } else {
+                    addResult('❌ Server returned error: ' + response.status, false);
+                }
+            } catch (error) {
+                addResult('❌ Cannot connect to server: ' + error.message, false);
+            }
+        }
+        
+        async function testChatAPI() {
+            try {
+                const response = await fetch('http://localhost:3001/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'Test message' })
+                });
+                
+                if (!response.ok) {
+                    addResult('❌ Chat API returned error: ' + response.status, false);
+                    return;
+                }
+                
+                const data = await response.json();
+                if (data.response) {
+                    addResult('✅ Chat API working - Response: ' + data.response.substring(0, 50) + '...');
+                } else {
+                    addResult('❌ Chat API returned no response', false);
+                }
+            } catch (error) {
+                addResult('❌ Chat API error: ' + error.message, false);
+            }
+        }
+        
+        async function testGeminiDirect() {
+            try {
+                const response = await fetch('http://localhost:3001/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'Halo, tolong jawab dengan "Test Gemini berhasil!"' })
+                });
+                
+                if (!response.ok) {
+                    addResult('❌ Gemini test failed: ' + response.status, false);
+                    return;
+                }
+                
+                const data = await response.json();
+                if (data.response && data.response.includes('Test Gemini berhasil')) {
+                    addResult('✅ Gemini AI is working correctly');
+                } else {
+                    addResult('⚠️ Gemini responded but not as expected: ' + data.response.substring(0, 100), false);
+                }
+            } catch (error) {
+                addResult('❌ Gemini test error: ' + error.message, false);
+            }
+        }
+    </script>
+</body>
+</html> 

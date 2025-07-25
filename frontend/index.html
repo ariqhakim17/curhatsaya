@@ -32,38 +32,138 @@
 
       // Tampilkan pesan user
       const chatBox = document.getElementById('chat-box');
-      chatBox.innerHTML += `<div class="flex justify-end"><div class="bg-blue-500 text-white px-4 py-2 rounded-lg max-w-xs break-words">${message}</div></div>`;
+              // Tampilkan pesan user dengan animasi fade in
+        const userMessageElement = document.createElement('div');
+        userMessageElement.className = 'flex justify-end';
+        userMessageElement.style.opacity = '0';
+        userMessageElement.style.transform = 'translateY(10px)';
+        userMessageElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+        userMessageElement.innerHTML = `<div class="bg-blue-500 text-white px-4 py-2 rounded-lg max-w-xs break-words">${message}</div>`;
+        chatBox.appendChild(userMessageElement);
+        
+        // Trigger animasi fade in
+        setTimeout(() => {
+          userMessageElement.style.opacity = '1';
+          userMessageElement.style.transform = 'translateY(0)';
+        }, 50);
       chatBox.scrollTop = chatBox.scrollHeight;
 
       input.value = '';
       input.disabled = true;
 
+      // Tampilkan loading indicator dengan ID yang unik
+      const loadingId = 'loading-' + Date.now();
+      const loadingElement = document.createElement('div');
+      loadingElement.id = loadingId;
+      loadingElement.className = 'flex justify-start';
+      loadingElement.innerHTML = `
+        <div class="bg-gray-200 text-gray-600 px-4 py-2 rounded-lg">
+          <div class="flex items-center">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            Sedang mengetik...
+          </div>
+        </div>
+      `;
+      chatBox.appendChild(loadingElement);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
       // Kirim ke backend
       try {
-        const response = await fetch('/chat', {
+        console.log('Sending message:', message);
+        
+        const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message })
         });
-        const data = await response.json();
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        // Hapus SEMUA loading indicator yang masih ada sebelum menampilkan respons AI
+        document.querySelectorAll('[id^="loading-"]').forEach(el => {
+          el.style.transition = 'opacity 0.3s ease-out';
+          el.style.opacity = '0';
+          setTimeout(() => {
+            if (el.parentNode) el.parentNode.removeChild(el);
+          }, 300);
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Response text:', errorText);
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+        
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText);
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.error('Response text that failed to parse:', responseText);
+          throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
+        }
+        
+        console.log('Parsed response data:', data);
 
-        // Tampilkan respons AI
+        // Tampilkan respons AI dengan animasi fade in
         const responseId = 'ai-response-' + Date.now() + '-' + Math.floor(Math.random()*10000);
-        chatBox.innerHTML += `
-          <div class="flex justify-start">
-            <div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg max-w-xs break-words relative">
-              <div id="${responseId}-text">${data.response || data.error}</div>
-              <div class="flex gap-2 mt-2 items-center">
-                <button onclick="copyToClipboard('${responseId}-text')" title="Salin" class="text-xs px-2 py-1 bg-gray-300 rounded hover:bg-gray-400">Salin</button>
-                <button onclick="sendFeedback('${responseId}', 'up')" title="Bagus" class="text-green-600 text-lg">👍</button>
-                <button onclick="sendFeedback('${responseId}', 'down')" title="Kurang" class="text-red-600 text-lg">👎</button>
-              </div>
+        const responseElement = document.createElement('div');
+        responseElement.className = 'flex justify-start';
+        responseElement.style.opacity = '0';
+        responseElement.style.transform = 'translateY(10px)';
+        responseElement.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        responseElement.innerHTML = `
+          <div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg max-w-xs break-words relative">
+            <div id="${responseId}-text">${data.response || data.error || 'Tidak ada respons'}</div>
+            <div class="flex gap-2 mt-2 items-center">
+              <button onclick="copyToClipboard('${responseId}-text')" title="Salin" class="text-xs px-2 py-1 bg-gray-300 rounded hover:bg-gray-400">Salin</button>
+              <button onclick="sendFeedback('${responseId}', 'up')" title="Bagus" class="text-green-600 text-lg">👍</button>
+              <button onclick="sendFeedback('${responseId}', 'down')" title="Kurang" class="text-red-600 text-lg">👎</button>
             </div>
           </div>
         `;
+        chatBox.appendChild(responseElement);
+        
+        // Trigger animasi fade in
+        setTimeout(() => {
+          responseElement.style.opacity = '1';
+          responseElement.style.transform = 'translateY(0)';
+        }, 50);
+        
         chatBox.scrollTop = chatBox.scrollHeight;
       } catch (err) {
-        chatBox.innerHTML += `<div class="flex justify-start"><div class="bg-red-200 text-red-800 px-4 py-2 rounded-lg max-w-xs break-words">Error: ${err.message}</div></div>`;
+        console.error('Error details:', err);
+        
+        // Hapus loading indicator jika masih ada dengan animasi fade out
+        const loadingElement = document.getElementById(loadingId);
+        if (loadingElement) {
+          loadingElement.style.transition = 'opacity 0.3s ease-out';
+          loadingElement.style.opacity = '0';
+          setTimeout(() => {
+            if (loadingElement.parentNode) {
+              loadingElement.parentNode.removeChild(loadingElement);
+            }
+          }, 300);
+        }
+        
+        // Tampilkan error dengan animasi fade in
+        const errorElement = document.createElement('div');
+        errorElement.className = 'flex justify-start';
+        errorElement.style.opacity = '0';
+        errorElement.style.transform = 'translateY(10px)';
+        errorElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+        errorElement.innerHTML = `<div class="bg-red-200 text-red-800 px-4 py-2 rounded-lg max-w-xs break-words">Error: ${err.message}</div>`;
+        chatBox.appendChild(errorElement);
+        
+        // Trigger animasi fade in
+        setTimeout(() => {
+          errorElement.style.opacity = '1';
+          errorElement.style.transform = 'translateY(0)';
+        }, 50);
       } finally {
         input.disabled = false;
         input.focus();
