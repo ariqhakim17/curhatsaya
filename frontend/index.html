@@ -3,180 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat dengan Gemini AI</title>
+  <title>Gemini Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="https://www.gstatic.com/lamda/images/gemini_sparkle_48dp.png">
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="w-full max-w-md bg-white rounded-lg shadow-lg flex flex-col h-[80vh]">
-    <div class="p-4 border-b text-center text-xl font-bold text-blue-700">Chat Gemini AI</div>
-    <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50"></div>
-    <div class="p-4 border-t flex gap-2">
-      <input type="text" id="user-input" placeholder="Ketik pesan..." class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400" />
-      <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Kirim</button>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="w-full flex items-center justify-center py-4 border-b bg-white shadow-sm">
+    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_48dp.png" alt="Gemini" class="w-7 h-7 mr-2">
+    <span class="text-2xl font-semibold text-gray-800 tracking-tight">Gemini Chat</span>
+  </header>
+  <main class="flex-1 flex flex-col items-center justify-center w-full">
+    <div class="w-full max-w-lg flex flex-col h-[80vh] bg-white rounded-xl shadow-lg overflow-hidden">
+      <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gray-50"></div>
+      <form id="chat-form" class="flex items-center gap-2 border-t bg-white px-4 py-3" autocomplete="off" onsubmit="event.preventDefault(); sendMessage();">
+        <input type="text" id="user-input" placeholder="Ketik pesan..." class="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-100 text-gray-800" />
+        <button type="submit" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2 rounded-full font-semibold shadow hover:from-blue-600 hover:to-blue-700 transition">Kirim</button>
+      </form>
     </div>
-  </div>
+  </main>
   <script>
     // Tambahkan contoh balasan terformat saat halaman dibuka
     window.addEventListener('DOMContentLoaded', () => {
       const chatBox = document.getElementById('chat-box');
-      chatBox.innerHTML += `<div class="flex justify-start"><div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg max-w-xs break-words">
-        <b>Selamat datang di Chat Gemini AI!</b><br>
-        Silakan ketik pertanyaan atau pesan Anda di bawah ini, dan saya akan membantu Anda.
-      </div></div>`;
+      chatBox.innerHTML += `<div class="flex items-start"><div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-[75%] shadow">👋 <b>Selamat datang di Gemini Chat!</b><br>Silakan ketik pertanyaan atau pesan kamu di bawah, aku siap membantu.</div></div>`;
     });
 
     async function sendMessage() {
       const input = document.getElementById('user-input');
       const message = input.value.trim();
       if (!message) return;
-
-      // Tampilkan pesan user
       const chatBox = document.getElementById('chat-box');
-              // Tampilkan pesan user dengan animasi fade in
-        const userMessageElement = document.createElement('div');
-        userMessageElement.className = 'flex justify-end';
-        userMessageElement.style.opacity = '0';
-        userMessageElement.style.transform = 'translateY(10px)';
-        userMessageElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
-        userMessageElement.innerHTML = `<div class="bg-blue-500 text-white px-4 py-2 rounded-lg max-w-xs break-words">${message}</div>`;
-        chatBox.appendChild(userMessageElement);
-        
-        // Trigger animasi fade in
-        setTimeout(() => {
-          userMessageElement.style.opacity = '1';
-          userMessageElement.style.transform = 'translateY(0)';
-        }, 50);
+      // User bubble
+      const userMessageElement = document.createElement('div');
+      userMessageElement.className = 'flex justify-end';
+      userMessageElement.innerHTML = `<div class="bg-gradient-to-r from-blue-500 to-blue-400 text-white px-4 py-2 rounded-2xl max-w-[75%] shadow text-right">${message}</div>`;
+      chatBox.appendChild(userMessageElement);
       chatBox.scrollTop = chatBox.scrollHeight;
-
       input.value = '';
       input.disabled = true;
-
-      // Tampilkan loading indicator dengan ID yang unik
+      // Loading AI bubble
       const loadingId = 'loading-' + Date.now();
       const loadingElement = document.createElement('div');
       loadingElement.id = loadingId;
-      loadingElement.className = 'flex justify-start';
-      loadingElement.innerHTML = `
-        <div class="bg-gray-200 text-gray-600 px-4 py-2 rounded-lg">
-          <div class="flex items-center">
-            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-            Sedang mengetik...
-          </div>
-        </div>
-      `;
+      loadingElement.className = 'flex items-start';
+      loadingElement.innerHTML = `<div class="bg-gray-200 text-gray-600 px-4 py-2 rounded-2xl max-w-[75%] shadow flex items-center gap-2"><span class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span> Sedang mengetik...</div>`;
       chatBox.appendChild(loadingElement);
       chatBox.scrollTop = chatBox.scrollHeight;
-
-      // Kirim ke backend
       try {
-        console.log('Sending message:', message);
-        
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message })
         });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        // Hapus SEMUA loading indicator yang masih ada sebelum menampilkan respons AI
-        document.querySelectorAll('[id^="loading-"]').forEach(el => {
-          el.style.transition = 'opacity 0.3s ease-out';
-          el.style.opacity = '0';
-          setTimeout(() => {
-            if (el.parentNode) el.parentNode.removeChild(el);
-          }, 300);
-        });
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Response text:', errorText);
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-        
-        const responseText = await response.text();
-        console.log('Raw response text:', responseText);
-        
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          console.error('Response text that failed to parse:', responseText);
-          throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}...`);
-        }
-        
-        console.log('Parsed response data:', data);
-
-        // Tampilkan respons AI dengan animasi fade in
+        document.querySelectorAll('[id^="loading-"]').forEach(el => el.remove());
+        if (!response.ok) throw new Error(await response.text());
+        const data = await response.json();
         const responseId = 'ai-response-' + Date.now() + '-' + Math.floor(Math.random()*10000);
-        const responseElement = document.createElement('div');
-        responseElement.className = 'flex justify-start';
-        responseElement.style.opacity = '0';
-        responseElement.style.transform = 'translateY(10px)';
-        responseElement.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
-        responseElement.innerHTML = `
-          <div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg max-w-xs break-words relative">
+        const aiBubble = document.createElement('div');
+        aiBubble.className = 'flex items-start';
+        aiBubble.innerHTML = `
+          <div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-[75%] shadow relative">
             <div id="${responseId}-text">${data.response || data.error || 'Tidak ada respons'}</div>
-            <div class="flex gap-2 mt-2 items-center">
-              <button onclick="copyToClipboard('${responseId}-text')" title="Salin" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
-                <svg class="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z" clip-rule="evenodd"/>
-                  <path fill-rule="evenodd" d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z" clip-rule="evenodd"/>
-                </svg>
+            <div class="absolute right-2 bottom-2 flex gap-1">
+              <button onclick="copyToClipboard('${responseId}-text')" id="${responseId}-copy" title="Salin" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
+                <svg class="w-5 h-5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/></svg>
               </button>
               <button onclick="sendFeedback('${responseId}', 'up')" id="${responseId}-up" title="Bagus" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
-                <svg class="w-6 h-6 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475"/>
-                </svg>
+                <svg class="w-5 h-5 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475"/></svg>
               </button>
               <button onclick="sendFeedback('${responseId}', 'down')" id="${responseId}-down" title="Kurang" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
-                <svg class="w-6 h-6 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13c-.889.086-1.416.543-2.156 1.057a22.322 22.322 0 0 0-3.958 5.084 1.6 1.6 0 0 1-.582.628 1.549 1.549 0 0 1-1.466.087 1.587 1.587 0 0 1-.537-.406 1.666 1.666 0 0 1-.384-1.279l1.389-4.114M17 13h3V6.5A1.5 1.5 0 0 0 18.5 5v0A1.5 1.5 0 0 0 17 6.5V13Zm-6.5 1H5.585c-.286 0-.372-.014-.626-.15a1.797 1.797 0 0 1-.637-.572 1.873 1.873 0 0 1-.215-1.673l2.098-6.4C6.462 4.48 6.632 4 7.88 4c2.302 0 4.79.943 6.67 1.475"/>
-                </svg>
+                <svg class="w-5 h-5 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13c-.889.086-1.416.543-2.156 1.057a22.322 22.322 0 0 0-3.958 5.084 1.6 1.6 0 0 1-.582.628 1.549 1.549 0 0 1-1.466.087 1.587 1.587 0 0 1-.537-.406 1.666 1.666 0 0 1-.384-1.279l1.389-4.114M17 13h3V6.5A1.5 1.5 0 0 0 18.5 5v0A1.5 1.5 0 0 0 17 6.5V13Zm-6.5 1H5.585c-.286 0-.372-.014-.626-.15a1.797 1.797 0 0 1-.637-.572 1.873 1.873 0 0 1-.215-1.673l2.098-6.4C6.462 4.48 6.632 4 7.88 4c2.302 0 4.79.943 6.67 1.475"/></svg>
               </button>
             </div>
-          </div>
-        `;
-        chatBox.appendChild(responseElement);
-        
-        // Trigger animasi fade in
-        setTimeout(() => {
-          responseElement.style.opacity = '1';
-          responseElement.style.transform = 'translateY(0)';
-        }, 50);
-        
+          </div>`;
+        chatBox.appendChild(aiBubble);
         chatBox.scrollTop = chatBox.scrollHeight;
       } catch (err) {
-        console.error('Error details:', err);
-        
-        // Hapus loading indicator jika masih ada dengan animasi fade out
-        const loadingElement = document.getElementById(loadingId);
-        if (loadingElement) {
-          loadingElement.style.transition = 'opacity 0.3s ease-out';
-          loadingElement.style.opacity = '0';
-          setTimeout(() => {
-            if (loadingElement.parentNode) {
-              loadingElement.parentNode.removeChild(loadingElement);
-            }
-          }, 300);
-        }
-        
-        // Tampilkan error dengan animasi fade in
-        const errorElement = document.createElement('div');
-        errorElement.className = 'flex justify-start';
-        errorElement.style.opacity = '0';
-        errorElement.style.transform = 'translateY(10px)';
-        errorElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
-        errorElement.innerHTML = `<div class="bg-red-200 text-red-800 px-4 py-2 rounded-lg max-w-xs break-words">Error: ${err.message}</div>`;
-        chatBox.appendChild(errorElement);
-        
-        // Trigger animasi fade in
-        setTimeout(() => {
-          errorElement.style.opacity = '1';
-          errorElement.style.transform = 'translateY(0)';
-        }, 50);
+        document.querySelectorAll('[id^="loading-"]').forEach(el => el.remove());
+        const errorBubble = document.createElement('div');
+        errorBubble.className = 'flex items-start';
+        errorBubble.innerHTML = `<div class="bg-red-200 text-red-800 px-4 py-2 rounded-2xl max-w-[75%] shadow">Error: ${err.message}</div>`;
+        chatBox.appendChild(errorBubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
       } finally {
         input.disabled = false;
         input.focus();
