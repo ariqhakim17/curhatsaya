@@ -120,9 +120,15 @@
           <div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg max-w-xs break-words relative">
             <div id="${responseId}-text">${data.response || data.error || 'Tidak ada respons'}</div>
             <div class="flex gap-2 mt-2 items-center">
-              <button onclick="copyToClipboard('${responseId}-text')" title="Salin" class="text-xs px-2 py-1 bg-gray-300 rounded hover:bg-gray-400">Salin</button>
-              <button onclick="sendFeedback('${responseId}', 'up')" title="Bagus" class="text-green-600 text-lg">👍</button>
-              <button onclick="sendFeedback('${responseId}', 'down')" title="Kurang" class="text-red-600 text-lg">👎</button>
+              <button onclick="copyToClipboard('${responseId}-text')" title="Salin" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/><rect x="3" y="3" width="13" height="13" rx="2" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/></svg>
+              </button>
+              <button onclick="sendFeedback('${responseId}', 'up')" title="Bagus" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 9V5a3 3 0 00-6 0v4m-4 0h16a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z"/></svg>
+              </button>
+              <button onclick="sendFeedback('${responseId}', 'down')" title="Kurang" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 15v4a3 3 0 006 0v-4m4 0H4a2 2 0 01-2-2v-6a2 2 0 012-2h16a2 2 0 012 2v6a2 2 0 01-2 2z"/></svg>
+              </button>
             </div>
           </div>
         `;
