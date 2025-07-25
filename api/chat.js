@@ -14,13 +14,13 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'No message provided' });
     }
 
-    const promptSantai = `Kamu adalah psikolog santai, ramah, dan tidak perlu menjawab terlalu panjang. Jawab pertanyaan berikut dengan singkat, jelas, dan tetap empati: ${message}`;
+    const promptSantaiPendek = `Kamu adalah psikolog santai dan ramah. Jawab pertanyaan berikut dengan singkat, jelas, dan empati, maksimal 3 kalimat saja, jangan terlalu panjang: ${message}`;
 
     const response = await axios.post(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
       {
         contents: [
-          { parts: [{ text: promptSantai }] }
+          { parts: [{ text: promptSantaiPendek }] }
         ]
       },
       {
