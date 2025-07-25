@@ -5,19 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gemini Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="icon" href="https://www.gstatic.com/lamda/images/gemini_sparkle_48dp.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body, input, button, textarea, select {
+      font-family: 'Roboto', 'Google Sans', Arial, Helvetica, sans-serif;
+    }
+  </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
   <header class="w-full flex items-center justify-center py-4 border-b bg-white shadow-sm">
-    <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_48dp.png" alt="Gemini" class="w-7 h-7 mr-2">
     <span class="text-2xl font-semibold text-gray-800 tracking-tight">Gemini Chat</span>
   </header>
   <main class="flex-1 flex flex-col items-center justify-center w-full">
     <div class="w-full max-w-lg flex flex-col h-[80vh] bg-white rounded-xl shadow-lg overflow-hidden">
-      <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-gray-50"></div>
-      <form id="chat-form" class="flex items-center gap-2 border-t bg-white px-4 py-3" autocomplete="off" onsubmit="event.preventDefault(); sendMessage();">
-        <input type="text" id="user-input" placeholder="Ketik pesan..." class="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-100 text-gray-800" />
-        <button type="submit" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2 rounded-full font-semibold shadow hover:from-blue-600 hover:to-blue-700 transition">Kirim</button>
+      <div id="chat-box" class="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gray-50">
+      </div>
+      <form id="chat-form" class="flex items-center gap-3 border-t bg-white px-6 py-4" autocomplete="off" onsubmit="event.preventDefault(); sendMessage();">
+        <input type="text" id="user-input" placeholder="Ketik pesan..." class="flex-1 border border-gray-300 rounded-full px-5 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-100 text-gray-800 text-base" />
+        <button type="submit" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-full font-semibold shadow hover:from-blue-600 hover:to-blue-700 transition text-base">Kirim</button>
       </form>
     </div>
   </main>
@@ -25,7 +32,7 @@
     // Tambahkan contoh balasan terformat saat halaman dibuka
     window.addEventListener('DOMContentLoaded', () => {
       const chatBox = document.getElementById('chat-box');
-      chatBox.innerHTML += `<div class="flex items-start"><div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-[75%] shadow">👋 <b>Selamat datang di Gemini Chat!</b><br>Silakan ketik pertanyaan atau pesan kamu di bawah, aku siap membantu.</div></div>`;
+      chatBox.innerHTML += `<div class="flex items-start"><div class="bg-gray-200 text-gray-800 px-5 py-3 rounded-2xl max-w-[75%] shadow text-base leading-relaxed">👋 <b>Selamat datang di Gemini Chat!</b><br>Silakan ketik pertanyaan atau pesan kamu di bawah, aku siap membantu.</div></div>`;
     });
 
     async function sendMessage() {
@@ -36,7 +43,7 @@
       // User bubble
       const userMessageElement = document.createElement('div');
       userMessageElement.className = 'flex justify-end';
-      userMessageElement.innerHTML = `<div class="bg-gradient-to-r from-blue-500 to-blue-400 text-white px-4 py-2 rounded-2xl max-w-[75%] shadow text-right">${message}</div>`;
+      userMessageElement.innerHTML = `<div class="bg-gradient-to-r from-blue-500 to-blue-400 text-white px-5 py-3 rounded-2xl max-w-[75%] shadow text-right text-base leading-relaxed">${message}</div>`;
       chatBox.appendChild(userMessageElement);
       chatBox.scrollTop = chatBox.scrollHeight;
       input.value = '';
@@ -46,7 +53,7 @@
       const loadingElement = document.createElement('div');
       loadingElement.id = loadingId;
       loadingElement.className = 'flex items-start';
-      loadingElement.innerHTML = `<div class="bg-gray-200 text-gray-600 px-4 py-2 rounded-2xl max-w-[75%] shadow flex items-center gap-2"><span class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span> Sedang mengetik...</div>`;
+      loadingElement.innerHTML = `<div class="bg-gray-200 text-gray-600 px-5 py-3 rounded-2xl max-w-[75%] shadow flex items-center gap-2 text-base leading-relaxed"><span class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span> Sedang mengetik...</div>`;
       chatBox.appendChild(loadingElement);
       chatBox.scrollTop = chatBox.scrollHeight;
       try {
@@ -62,7 +69,7 @@
         const aiBubble = document.createElement('div');
         aiBubble.className = 'flex items-start';
         aiBubble.innerHTML = `
-          <div class="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-[75%] shadow relative">
+          <div class="bg-gray-200 text-gray-800 px-5 py-3 rounded-2xl max-w-[75%] shadow relative text-base leading-relaxed">
             <div id="${responseId}-text">${data.response || data.error || 'Tidak ada respons'}</div>
             <div class="absolute right-2 bottom-2 flex gap-1">
               <button onclick="copyToClipboard('${responseId}-text')" id="${responseId}-copy" title="Salin" class="p-1 rounded hover:bg-gray-300 focus:outline-none">
@@ -82,7 +89,7 @@
         document.querySelectorAll('[id^="loading-"]').forEach(el => el.remove());
         const errorBubble = document.createElement('div');
         errorBubble.className = 'flex items-start';
-        errorBubble.innerHTML = `<div class="bg-red-200 text-red-800 px-4 py-2 rounded-2xl max-w-[75%] shadow">Error: ${err.message}</div>`;
+        errorBubble.innerHTML = `<div class="bg-red-200 text-red-800 px-5 py-3 rounded-2xl max-w-[75%] shadow text-base leading-relaxed">Error: ${err.message}</div>`;
         chatBox.appendChild(errorBubble);
         chatBox.scrollTop = chatBox.scrollHeight;
       } finally {
